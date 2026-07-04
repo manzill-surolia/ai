@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#000000">
+
+  <title>wake up manzill</title>
+  <meta name="description" content="wake up manzill — a Matrix-style terminal landing page. Follow the white rabbit.">
+  <meta name="author" content="manzill">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://ai.manzill.com/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="ai.manzill.com">
+  <meta property="og:title" content="wake up manzill">
+  <meta property="og:description" content="A Matrix-style terminal landing page. Follow the white rabbit.">
+  <meta property="og:url" content="https://ai.manzill.com/">
+  <meta property="og:image" content="https://ai.manzill.com/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Green terminal text reading 'wake up manzill' on a black screen.">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="wake up manzill">
+  <meta name="twitter:description" content="A Matrix-style terminal landing page. Follow the white rabbit.">
+  <meta name="twitter:image" content="https://ai.manzill.com/og-image.png">
+
+  <!-- Favicon: green terminal glyph on black -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Ctext x='6' y='23' font-family='monospace' font-size='20' fill='%2300ff41'%3E%26gt;%3C/text%3E%3C/svg%3E">
+
+  <!-- Structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "wake up manzill",
+    "url": "https://ai.manzill.com/",
+    "description": "A Matrix-style terminal landing page for manzill."
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg: #000;
+      --green: #00ff41;
+      --green-dim: #00b32c;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: var(--bg);
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      color: var(--green);
+      font-family: "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+      overflow-x: hidden;
+      /* subtle screen glow */
+      text-shadow: 0 0 6px rgba(0, 255, 65, 0.55);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    main {
+      padding:
+        calc(env(safe-area-inset-top) + 1.25rem)
+        calc(env(safe-area-inset-right) + 1.25rem)
+        calc(env(safe-area-inset-bottom) + 1.25rem)
+        calc(env(safe-area-inset-left) + 1.25rem);
+    }
+
+    .terminal {
+      font-size: clamp(1.15rem, 6vw, 2rem);
+      line-height: 1.4;
+      white-space: pre-wrap;
+      word-break: break-word;
+      letter-spacing: 0.02em;
+    }
+
+    .prompt { color: var(--green-dim); }
+
+    /* Blinking block cursor */
+    .cursor {
+      display: inline-block;
+      width: 0.6ch;
+      background: var(--green);
+      color: var(--green);
+      margin-left: 0.05em;
+      animation: blink 1s steps(1) infinite;
+    }
+
+    /* Steady (non-blinking) while text is being typed */
+    .cursor.typing { animation: none; }
+
+    @keyframes blink {
+      0%, 50%   { opacity: 1; }
+      50.01%, 100% { opacity: 0; }
+    }
+
+    /* Screen-reader / SEO text, visually hidden */
+    .visually-hidden {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cursor { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <!-- Real, crawlable heading for SEO + screen readers -->
+    <h1 class="visually-hidden">wake up manzill</h1>
+
+    <!-- Visual terminal (animated); hidden from assistive tech to avoid per-char noise -->
+    <div class="terminal" aria-hidden="true"><span class="prompt">&gt;&nbsp;</span><span id="typed"></span><span id="cursor" class="cursor">&nbsp;</span></div>
+  </main>
+
+  <script>
+    (function () {
+      var MESSAGE = "wake up manzill";
+      var typedEl = document.getElementById("typed");
+      var cursorEl = document.getElementById("cursor");
+
+      var reduceMotion = window.matchMedia &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      // Reduced motion: show the full message at once, leave the cursor blinking.
+      if (reduceMotion) {
+        typedEl.textContent = MESSAGE;
+        return;
+      }
+
+      // Cursor stays steady while typing.
+      cursorEl.classList.add("typing");
+
+      var i = 0;
+      var START_DELAY = 700;   // brief blink before typing begins
+      var BASE_SPEED = 130;    // ms per character
+      var JITTER = 70;         // random extra ms for a human feel
+
+      function typeNext() {
+        if (i < MESSAGE.length) {
+          typedEl.textContent += MESSAGE.charAt(i);
+          i++;
+          setTimeout(typeNext, BASE_SPEED + Math.random() * JITTER);
+        } else {
+          // Done — let the cursor blink from here on.
+          cursorEl.classList.remove("typing");
+        }
+      }
+
+      // Blink the cursor for a moment, then type the message once.
+      setTimeout(typeNext, START_DELAY);
+    })();
+  </script>
+</body>
+</html>
